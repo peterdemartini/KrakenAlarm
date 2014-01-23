@@ -2,6 +2,7 @@
 
 import time
 import pygame
+import math
 
 class AlarmClock(object):
     COLOR_TRANSPARENT=0
@@ -12,17 +13,19 @@ class AlarmClock(object):
     bg_color=0
     alarm_time='06:30'
     org_alarm_time='06:30'
-    alarm_text='ALARM!!'
+    alarm_text='ALARM!'
     snooze_time=1
     org_snooze_time=0
     snooze_count=0
+    start=0
+    end=0
     debug=False
     flash=True
     sound='/home/pi/alarm.mp3'
+    alarm_triggered=False
 
     def __init__(self, debug=False):
         self.debug=debug
-        self.alarm_time=self.get_time()
         #copy over originals
         self.org_alarm_time=self.alarm_time
         self.org_snooze_time=self.snooze_time
@@ -33,8 +36,16 @@ class AlarmClock(object):
         if(self.debug):
             self.set_snooze()
 
+    def set_alarm_text(self, text):
+        if self.debug:
+            print("Setting Alarm Text to '%s'" % text)
+        self.alarm_text = text
+        return True
+    
     def set_alarm(self, time=False):
-        " Set alarm time in Hours : Minutes (12:59) "
+        " Set alarm time in Hours : Minutes (05:59) "
+        if self.debug:
+            print('Setting Alarm Time %s ' % time)
         if(time):
             self.alarm_time=time
         else:
@@ -43,7 +54,7 @@ class AlarmClock(object):
 
     def set_snooze_time(self, mins=10):
         " Set Snooze time, format in minutes "
-        self.snooze_time=mins
+        self.snooze_time=int(mins)
         self.org_snooze_time=self.snooze_time
 
     def set_snooze(self):
@@ -70,19 +81,40 @@ class AlarmClock(object):
             print("New Alarm Time %s" % self.alarm_time)
         if(self.snooze_time > 3):
             --self.snooze_time
+        self.alarm_triggered=False
         #Stop Sound
-        self.tigger_sound(False)
+        self.trigger_sound(False)
 
     def stop_alarm(self):
         " Stop Alarm and reset object "
         if(self.debug):
             print("Stopping alarm")
+        self.alarm_triggered=False
+        self.end = time.time()
         self.snooze_count=0
         self.alarm_time=self.org_alarm_time
         self.snooze_time=self.org_snooze_time
-        self.tigger_sound(False)
+        self.trigger_sound(False)
+        data = {'end' : int(round(self.end)), 'start' : int(round(self.start)), 'snooze_count' : self.snooze_count}
+        self.end = 0
+        self.start = 0
+        self.snooze_count = 0
+        return data
     
-    def tigger_sound(self, on):
+    def start_alarm(self):
+        " Start the Alarm "
+        if(self.debug):
+            print("Starting alarm")
+        self.trigger_sound(True)
+        self.start = time.time()
+        self.alarm_triggered = True
+
+    def self_destruct(self):
+        ' Stop Sound '
+        pygame.mixer.stop()
+        pygame.mixer.quit()
+    
+    def trigger_sound(self, on):
         " Trigger Sound "
         if(on):
             if(pygame.mixer.music.get_busy()):
@@ -111,13 +143,18 @@ class AlarmClock(object):
 
     def check_alarm(self):
         " Check to see if the alarm should be triggered "
-        return self.get_time() == self.alarm_time
+        if self.alarm_triggered:
+            return True
+        if self.get_time() == self.alarm_time:
+            return True
+        return False
 
     def display_msg(self):
         " Get the Current Display MSG"
         self.set_colors()
         if(self.check_alarm()):
-            self.tigger_sound(True)
+            if not self.alarm_triggered:
+                self.start_alarm()
             return self.alarm_text
         else:
             return self.get_dsp_time()
