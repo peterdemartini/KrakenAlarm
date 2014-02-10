@@ -16,6 +16,7 @@ class Matrices(object):
     def __init__(self, debug=False):
         self.debug = debug;
         self.x = self.offset
+        self.setup()
             
     def setup(self):
         ' Setup matrices '
@@ -28,13 +29,15 @@ class Matrices(object):
     
     def set_matrcies(self, num):
         ' Set Number of Matrices '
+        if self.debug:
+            print("Number of Matrices %s" % num)
         self.num = num
         
     def display_msg(self, message, color, bg):
             
         if message != self.last_message:
             # This means its a new message
-            x = 8 * self.num
+            self.x = 8 * self.num
         
         if len(message) > 6:
             if self.debug: 
@@ -43,7 +46,7 @@ class Matrices(object):
         else:
             x = self.offset
             too_long=False
-            
+        
         for i in range(0, self.num):
             # Draw message in each matrix buffer, offseting each by 8 pixels
             if too_long:

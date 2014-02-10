@@ -76,7 +76,7 @@ class Skynet(object):
         args = dict(default.items() + params.items())
         if self.debug:
             print("Update Device args %s " % args);
-        data = self.curl.make_request(url=self.base_url + 'devices/'+ uuid, method='PUT', args=args)
+        data = self.curl.make_request(url=self.base_url + 'devices/'+ str(uuid), method='PUT', args=args)
         if self.no_error(data):
             if self.debug:
                 print("Skynet Device Updated %s" % data['uuid'])

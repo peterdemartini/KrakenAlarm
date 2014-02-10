@@ -125,8 +125,9 @@ class AlarmClock(object):
 
     def self_destruct(self):
         ' Stop Sound '
-        pygame.mixer.stop()
-        pygame.mixer.quit()
+        if not pygame.mixer.get_init() == None:
+            pygame.mixer.stop()
+            pygame.mixer.quit()
     
     def trigger_sound(self, on):
         " Trigger Sound "

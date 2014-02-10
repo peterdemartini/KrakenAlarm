@@ -23,7 +23,7 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
 
 #Buttons Object
-btns = Buttons();
+btns = Buttons(debug=DEBUG);
 
 #Matrixes Object
 mtx = Matrices(debug=DEBUG);
@@ -35,7 +35,7 @@ skynet.send_message(message={"status" : "Booted Up!"})
 
 alarm = AlarmClock(debug=DEBUG)
 
-mtx.display_msg(alarm.display_msg());
+mtx.display_msg(message=alarm.display_msg(), color=alarm.get_color(), bg=alarm.get_bg());
 
 # Defintions for Alarm Hardware
 
@@ -54,7 +54,7 @@ def play_game():
     time.sleep(1)
 
     #Start Turn off Alarm Logic
-    btns.tigger_all(alarm=alarm, mtx=mtx, timeou)
+    btns.tigger_all(alarm=alarm, mtx=mtx, timeout=SHUTOFFPROMPTDELAY)
     
     #Turn On LEDs
     btns.turn_on_all();
