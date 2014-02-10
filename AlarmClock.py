@@ -15,7 +15,7 @@ class AlarmClock(object):
     org_alarm_time='06:30'
     alarm_text='ALARM!'
     snooze_time=1
-    org_snooze_time=0
+    org_snooze_time=10
     snooze_count=0
     start=0
     end=0
@@ -23,6 +23,7 @@ class AlarmClock(object):
     flash=True
     sound='/home/pi/alarm.mp3'
     alarm_triggered=False
+    sound_paused=True
 
     def __init__(self, debug=False):
         self.debug=debug
@@ -30,11 +31,9 @@ class AlarmClock(object):
         self.org_alarm_time=self.alarm_time
         self.org_snooze_time=self.snooze_time
         
-        pygame.mixer.init()
-        pygame.mixer.music.load(self.sound)
         #Debug Set Alarm for 2 minutes from now
-        if(self.debug):
-            self.set_snooze()
+        #if(self.debug):
+        #    self.set_snooze()
 
     def set_alarm_text(self, text):
         if self.debug:
@@ -63,7 +62,7 @@ class AlarmClock(object):
             print("Setting snooze")
         ++self.snooze_count
         # Increment Alarm Time
-        hrs = int(time.strftime('%I'))
+        hrs = int(time.strftime('%H'))
         mins = int(time.strftime('%M')) + self.snooze_time
         if(mins > 59):
             r = mins % 60
@@ -91,8 +90,10 @@ class AlarmClock(object):
             print("Stopping alarm")
         self.alarm_triggered=False
         self.end = time.time()
-        self.snooze_count=0
-        self.alarm_time=self.org_alarm_time
+        if self.org_alarm_time == self.get_time():
+            self.alarm_time=self.set_time_plus()
+        else:
+            self.alarm_time=self.org_alarm_time
         self.snooze_time=self.org_snooze_time
         self.trigger_sound(False)
         data = {'end' : int(round(self.end)), 'start' : int(round(self.start)), 'snooze_count' : self.snooze_count}
@@ -100,11 +101,24 @@ class AlarmClock(object):
         self.start = 0
         self.snooze_count = 0
         return data
-    
+
+    def set_time_plus(minutes=1, time=False):
+        if not time:
+            time = self.org_alarm_time
+        arr = time.split(':')
+        hrs = int(arr[0]);
+        mins = int(arr[1])
+        mins += minutes
+        if hrs < 10:
+            hrs = str('0') + str(hrs)
+        if mins < 10:
+            mins = str('0') + str(mins)
+        return hrs + ':' + mins
+
     def start_alarm(self):
         " Start the Alarm "
         if(self.debug):
-            print("Starting alarm")
+            print("Starting alarm " + self.get_time())
         self.trigger_sound(True)
         self.start = time.time()
         self.alarm_triggered = True
@@ -116,22 +130,27 @@ class AlarmClock(object):
     
     def trigger_sound(self, on):
         " Trigger Sound "
-        if(on):
-            if(pygame.mixer.music.get_busy()):
+        if pygame.mixer.get_init() == None:
+            pygame.mixer.init()
+            pygame.mixer.music.load(self.sound)
+        if on:
+            if not self.sound_paused:
                 return
-            if(self.debug):
+            if self.debug:
                 print("Playing sound")
             # Play sound up to 25 times
+            self.sound_paused=False
             pygame.mixer.music.play(25)
         else:
             if(self.debug):
                 print("Pausing sound")
             # Pause sound
-            pygame.mixer.music.pause()
+            self.sound_paused=True
+            pygame.mixer.music.stop()
 
     def get_time(self):
         " Get Time "
-        return time.strftime("%I:%M")
+        return time.strftime("%H:%M")
     
     def get_dsp_time(self):
         " GetDisplay Time "

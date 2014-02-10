@@ -17,7 +17,7 @@ class KrakenMaster(object):
         return data
 
     def create_grade(self, args):
-        data = self.curl.make_request(url=self.base_url + 'grades/api/create', method='POST',type_json=True, args=args)
+        data = self.curl.make_request(url=self.base_url + 'grades/api/create', method='GET', args=args)
         if self.debug:
             print("Created Grade :: %s " % data)
         if data and 'success' in data:
