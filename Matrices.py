@@ -16,7 +16,6 @@ class Matrices(object):
     def __init__(self, debug=False):
         self.debug = debug;
         self.x = self.offset
-        self.setup()
             
     def setup(self):
         ' Setup matrices '
@@ -33,8 +32,7 @@ class Matrices(object):
             print("Number of Matrices %s" % num)
         self.num = num
         
-    def display_msg(self, message, color, bg):
-            
+    def display_msg(self, message, color, bg):            
         if message != self.last_message:
             # This means its a new message
             self.x = 8 * self.num
@@ -44,13 +42,13 @@ class Matrices(object):
                 print('TOO LONG')
             too_long=True
         else:
-            x = self.offset
+            self.x = self.offset
             too_long=False
-        
+            
         for i in range(0, self.num):
             # Draw message in each matrix buffer, offseting each by 8 pixels
-            if too_long:
-                self.matrix[i].clear() #This was causing flickering
+            #if too_long:
+                #self.matrix[i].clear() #This was causing flickering
             self.matrix[i].setCursor(self.x - i * 8, 1)
             self.matrix[i].printMessage(message)
             self.matrix[i].setTextColor(color, bg)

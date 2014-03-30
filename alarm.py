@@ -28,6 +28,7 @@ btns = Buttons(debug=DEBUG);
 #Matrixes Object
 mtx = Matrices(debug=DEBUG);
 mtx.set_matrcies(5);
+mtx.setup();
 
 kraken = KrakenMaster(debug=DEBUG)
 skynet = Skynet(debug=False)
@@ -93,7 +94,7 @@ def update_settings():
 # Horiz. position of text -- starts off right edge
 iter = 0
 settings_check = 0
-loop_delay = 1
+loop_delay = 0.01
 
 try:
     while True:
